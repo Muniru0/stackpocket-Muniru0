@@ -1,0 +1,15 @@
+// @param : allUserSelections : array of all the userselections {[[],[],[],[]]}
+// @param : sampleSpace : sample space for the combination
+// @param : maxSelections : maximum number of selections allowed for the game 
+
+function pickFixedDigit3(allUserSelections,sampleSpace,maxSelections){
+
+
+ 
+  if(allUserSelections[0].length  < maxSelections){
+    return getCombinations(allUserSelections[1],sampleSpace).length
+  }
+
+  return allUserSelections[1].length;
+
+}
