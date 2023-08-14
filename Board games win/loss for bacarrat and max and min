@@ -1,0 +1,102 @@
+function board_game_bacarrat(){
+    
+    $draw_number = [];
+
+    for ($i=0; $i < 5; $i++) { 
+    
+        $rand_num = strval(rand(0,9));
+        $rand_num =  count(str_split($rand_num)) === 1 ? "$rand_num" : "$rand_num";
+    
+        $draw_number[] = $rand_num;
+    }
+    
+    shuffle($draw_number);
+   
+     $draw_number = array_slice($draw_number,0,5);
+    echo "Draw number : ".implode(",",$draw_number)."<br> <br> <br> <br>";
+    $sum_first_2 = intval($draw_number[0]) + intval($draw_number[1]);
+    $sum_last_2  = intval($draw_number[3]) + intval($draw_number[4]);
+
+    echo "Sum of first 2: ".$sum_first_2."<br> ";
+    echo "Sum of last 2: ".$sum_last_2."<br> <br> <br> <br>";
+
+$draw_number_sum = array_sum($draw_number);
+
+$selections = ["pl_wins"=>true,"br_pair"=>true,"pl_pair"=>true]; 
+// echo "Draw Number sum tail:  ".(array_sum($draw_number ) % 10)."<br> <br> <br> <br> <br>";
+
+echo "<pre>";
+print_r($selections);
+echo "</pre>";
+   if(isset($selections["br_pair"])){
+    echo  $draw_number[0] === $draw_number[1]  ?  "Broker Pair Won <br><br>" : "Broker Pair Lost  <br><br>";
+   }
+   if(isset($selections["pl_pair"])){
+    echo   $draw_number[3] === $draw_number[4]  ?  "Player Pair Won <br><br>" : "Player Pair Lost  <br><br>";
+   }
+   if(isset($selections["br_wins"])){
+    echo  $sum_first_2 > $sum_last_2  ?  " Broker Won <br><br>" : "Broker Lost  <br><br>";
+   }
+   if(isset($selections["pl_wins"])){
+    echo  $sum_first_2 < $sum_last_2  ?  " Player Won <br><br>" : "Player Lost  <br><br>";
+   }
+   if(isset($selections["draw"])){
+    echo  $sum_first_2 === $sum_last_2  ?  "Draw Won <br><br>" : "Draw Lost  <br><br>";
+   }
+   
+
+  
+  
+   
+    
+
+
+
+
+
+}
+
+function board_game_max_and_min_position(){
+    
+    $draw_number = explode(",",["0,1,2,3,4,5,6,7,8,9"][0]);
+    shuffle($draw_number);
+   
+     $draw_number = array_slice($draw_number,0,5);
+    echo "Draw number : ".implode(",",$draw_number)."<br> <br> <br> <br>";
+
+
+$selections = ["min"=>3, "max"=>7]; 
+
+echo "My Selections: ".implode(",",$selections)."<br><br> <br><br>";
+    $sorted_draw_number = [... $draw_number];
+
+    sort($sorted_draw_number);
+
+    $max = $sorted_draw_number[count($sorted_draw_number) - 1];
+    $min = $sorted_draw_number[0];
+
+    $max_positions = [];
+    
+
+    $min_positions = [];
+
+    foreach ($draw_number as $index => $value) {
+        $value = intval($value);
+        if ($value === $selections["max"]) {
+            $max_positions[] = $index;
+        }
+        if ($value === $selections["min"]) {
+            $min_positions[] = $index;
+        }
+    }
+    
+
+   echo  in_array($selections["min"] - 1,$min_positions)  ?  "Min Won <br><br>" : "Min Lost  <br><br>";
+   echo in_array($selections["max"] - 1,$max_positions) ?  "Max Won  <br><br>" : "Max Lost  <br><br>";
+    
+
+
+
+
+
+}
