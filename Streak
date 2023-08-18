@@ -1,0 +1,33 @@
+function streak($draw_number){
+
+  $draw_number = [1,2,9,4,5];
+  $streak_num = 0;
+
+
+  sort($draw_number);
+
+  print_r($draw_number);
+
+  foreach ($draw_number as $key => $value) {
+   
+
+    if($key === 0){
+      if($draw_number[$key + 1] - $value  === 1){
+        $streak_num += 1;
+      }else{
+        break;
+      }  
+    }else{
+        if(!isset($draw_number[$key + 1])){
+            break;
+        }
+        if((  $value - ($draw_number[$key - 1]) === 1) || (($draw_number[$key + 1] - $value) === 1)){
+           
+            $streak_num += 1;
+        }else{
+            break;
+        }  
+    }
+  }
+
+}
