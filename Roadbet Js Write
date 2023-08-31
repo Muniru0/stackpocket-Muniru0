@@ -1,0 +1,435 @@
+
+
+let flag = "s"
+
+let symbolsDigits
+let gameTypeLetter = ""
+let startLettersNewColumn
+let lettersMarkup = ""
+let gameTypeLetterBeforeDraw = ""
+
+
+let myInterval  
+let historyArray = []
+let previousEntry = []
+let previousFirstKeys = []
+let previousSecondKeys = []
+
+let previousEntryForletters 
+
+let isStartingDraws = true
+let countdownTimer = 10
+
+ let isTrend = false
+ let isDragonTiger = false
+ 
+let firstKeyTitle = "Next Big: "
+let secondKeyTitle = "Next Small: "
+ 
+let previousFirstKeyTitle = "Previous Big: "
+let previousSecondKeyTitle = "Previous Small: "
+
+$(function () {
+
+   console.log("top level called")
+   generateGraph()
+
+   myInterval = handleGraphScopeChange()
+
+    $(document).on("click",".sum.switch",function () {
+
+        if($(this).hasClass("selected-graph-scope") || isDragonTiger){
+          return;  
+        }
+
+        $(".sum.switch").removeClass("selected-graph-scope")
+        $(this).addClass("selected-graph-scope")
+        
+        countdownTimer = 10
+        flag = $(this).attr('id')
+        generateGraph()
+      
+     })
+
+
+    
+    $(document).on("click",".closing-button",function(){
+        clearInterval(myInterval);
+       })
+
+})
+    
+
+function handleGraphScopeChange(timerInterval = 1000,) {
+
+       
+      return setInterval(() => {
+        
+            
+            if(countdownTimer === 0){
+            
+             
+            
+             generateGraph()
+             $("#timer").empty().append(countdownTimer < 10 ? ": 0" +countdownTimer : ": " +countdownTimer)
+             countdownTimer = 10
+            }else{
+            $("#timer").empty().append(countdownTimer < 10 ? ": 0" +countdownTimer : ": " +countdownTimer)
+             countdownTimer -= 1
+            
+            }
+            
+    
+    
+        },timerInterval)
+    }// end of handleGraphScopeChange
+
+
+
+
+ // NOTE:
+ // When using Dragon/Tiger make sure to make the D in the Dragon
+ // to be Capital because of the "d" used to denote draw between Dragon
+ // and Tiger.
+ // generate the graph data
+ function generateGraph(gameType = "b/s"){
+    
+   
+
+   
+
+
+let randomNumber = Math.random().toString().split('.')[1];
+
+
+
+  
+let drawNumber = randomNumber.substring(0,5)
+
+  
+
+ 
+
+
+  let selectedGrapghScope 
+
+  if(flag == "s"){
+    selectedGrapghScope = drawNumber.split("").reduce((acc,curr) => parseInt(acc) + parseInt(curr))
+
+  }else if(flag == "1"){
+    selectedGrapghScope =drawNumber.split("")[0] 
+ 
+ }else if(flag == "2"){
+    selectedGrapghScope =drawNumber.split("")[1] 
+  
+  }else if(flag == "3"){
+    selectedGrapghScope =drawNumber.split("")[2] 
+  
+  }else if(flag == "4"){
+    selectedGrapghScope =drawNumber.split("")[3] 
+  }else{
+    selectedGrapghScope =drawNumber.split("")[4]
+  }
+
+
+
+ 
+  
+
+let firstKeys = randomNumber.substring(0 , 3).split('')     
+let secondKeys = firstKeys.map((item)=>(parseInt(item) + 1).toString())
+
+  
+  
+
+       $("#symbols-parent-1").empty()
+       $("#symbols-parent-2").empty()
+       $("#previous-symbols-parent-1").empty()
+       $("#previous-symbols-parent-2").empty()
+
+
+  // update the road intro
+     firstKeys.forEach((item,index)=>{
+         $("#symbols-parent-1").append(getSymbol(item,index,false,true))
+       
+         $("#symbols-parent-2").append(getSymbol(secondKeys[index],index,false,true))
+          
+         if(previousFirstKeys.length === 0){
+            $("#previous-symbols-parent-1").append(getSymbol(item,index,false,true))
+            $("#previous-symbols-parent-2").append(getSymbol(secondKeys[index],index,false,true))
+         }else{
+            $("#previous-symbols-parent-1").append(getSymbol(previousFirstKeys[index],index,false,true))
+            $("#previous-symbols-parent-2").append(getSymbol(previousSecondKeys[index],index,false,true))
+         }
+     })
+
+   
+
+
+    if(!isStartingDraws){
+
+    $("#draw-number").text(drawNumber)
+   
+    $("#draw-number-sum").text(selectedGrapghScope)
+   
+
+
+
+ // update the letters raised card
+   if(gameType === "b/s"){
+    firstKeyTitle = 'Next Big: '
+    secondKeyTitle = 'Next Small: '
+    previousFirstKeyTitle = 'Previous Big: '
+    previousSecondKeyTitle = 'Previous Small: '
+    console.log( selectedGrapghScope > 4 ? `ball ${flag}: ${selectedGrapghScope} is Big` :`ball ${flag}: ${selectedGrapghScope} is Small`)
+    handleGameTypeProcessing(flag === "s" ? selectedGrapghScope > 22 : selectedGrapghScope > 4,"b","s")
+   }else if(gameType === "o/e"){
+    firstKeyTitle = 'Next Even: '
+    secondKeyTitle = 'Next Odd: '
+    previousFirstKeyTitle = 'Previous Even: '
+    previousSecondKeyTitle = 'Previous Odd: '
+    handleGameTypeProcessing((selectedGrapghScope % 2 === 0),"e","o")
+   }else if(gameType === "D/t"){
+    firstKeyTitle = 'Next Dragon: '
+    secondKeyTitle = 'Next Tiger: '
+    previousFirstKeyTitle = 'Previous Dragon: '
+    previousSecondKeyTitle = 'Previous Tiger: '
+    
+    $('.non-dragon').hide()
+      //  handleGameTypeProcessing(parseInt(drawNumber.split("")[0]) > parseInt(drawNumber.split("")[4]),"D","t",(parseInt(drawNumber.split("")[0]) % 2 === 0) ? undefined : "d" )
+      handleGameTypeProcessing(parseInt(drawNumber.split("")[0]) > parseInt(drawNumber.split("")[4]),"D","t",parseInt(drawNumber.split("")[0]) !== parseInt(drawNumber.split("")[4]) ? undefined : "d" )
+    
+   
+   }else if(gameType === "p/c"){
+    firstKeyTitle = 'Next Prime: '
+    secondKeyTitle = 'Next Composite: '
+    previousFirstKeyTitle = 'Previous Prime: '
+    previousSecondKeyTitle = 'Previous Composite: '
+    handleGameTypeProcessing(isPrimeOrComposite(selectedGrapghScope) ,"p","c")
+   }
+  
+   try{
+
+   
+   $("#first-key-title").text(firstKeyTitle)
+   $("#second-key-title").text(secondKeyTitle)
+   $("#previous-first-key-title").text(previousFirstKeyTitle)
+   $("#previous-second-key-title").text(previousSecondKeyTitle)
+   }catch(err){
+    console.log(err.stack)
+   }
+
+    // update the letters raised card
+   (startLettersNewColumn && $("#letters-raised-card").append(lettersMarkup))
+
+
+   if(isTrend)  return
+  
+symbolsDigits.forEach((item,index) => {
+  
+   
+    
+    item = parseInt(item)
+    
+
+    // use even numbers for red and odd numbers for blue
+        // start a new column if the previous and current entries
+        // colors are the same
+    let startNewColumn = previousEntry.length === 0 ? true : (previousEntry[index] % 2 != item % 2) 
+    
+
+ 
+
+    if(index === 0){
+
+            let allColumns = $("#circles-wrapper").find('.new-column')
+            if(allColumns.length === 11){
+                allColumns[0].remove()
+            }
+        
+            if(startNewColumn){
+               
+               
+                // update the circles   
+            $("#circles-wrapper").append(getSymbol(item,index,startNewColumn)) 
+            
+            }else{
+                
+                // update the circles   
+         
+           $(allColumns[allColumns.length - 1]).append(getSymbol(item,index))
+            }
+
+       
+
+    }else if(index === 2 ){
+
+       
+        
+        let allColumns = $("#diagonals-wrapper").find('.new-column')
+
+        if(allColumns.length === 11){
+            allColumns[0].remove()
+        }
+
+        if(startNewColumn){
+
+          
+               // update the diagonals
+        $("#diagonals-wrapper").append(getSymbol(item,index,startNewColumn))
+        }else{
+
+           
+        // update the diagonals
+        
+        $(allColumns[allColumns.length - 1]).append(getSymbol(item,index))
+        }
+     
+
+    }else { 
+
+
+        let allColumns = $("#dots-wrapper").find('.new-column')
+        
+        if(allColumns.length === 11){
+            allColumns[0].remove()
+        }
+
+        if(startNewColumn){
+           
+        // update the dots
+       $("#dots-wrapper").append(getSymbol(item,index,startNewColumn)) 
+    }else{
+        
+        let allColumns = $("#dots-wrapper").find('.new-column')
+        $(allColumns[allColumns.length - 1]).append(getSymbol(item,index))
+        
+    }   
+      
+
+    }
+   
+
+
+
+});
+
+
+previousEntry = symbolsDigits.map(item => parseInt(item))
+
+
+
+historyArray.push(selectedGrapghScope)
+
+ }
+
+
+ previousFirstKeys = firstKeys
+ previousSecondKeys = secondKeys
+ isStartingDraws = false
+ 
+
+
+    // check the if the number is composite or prime
+    function isPrimeOrComposite(number){
+
+        if(number < 2){
+            return false
+        }
+
+        for(let i = 2; i < Math.sqrt(number); i++){
+
+            // if the number is divisible by 2 it is composite
+            if(number % i === 0) return false
+        }
+
+        return true
+
+
+    }
+  
+
+    
+ function handleGameTypeProcessing(condition,firstLetter = "b",lastLetter = "s",draw){
+
+   
+  
+    if(previousFirstKeys.length === 0) return   
+
+     
+    
+    (condition === undefined) && (symbolsDigits = [])
+
+    symbolsDigits  = draw === undefined ? ( condition ? previousFirstKeys : previousSecondKeys ) : previousSecondKeys
+    gameTypeLetter  = draw === undefined  ? ( condition ? firstLetter : lastLetter) : "d"
+    startLettersNewColumn = draw === undefined  ? ( previousEntryForletters === undefined ? true : (previousEntryForletters === "d" ? false : (previousEntryForletters !== gameTypeLetter))) : (previousEntryForletters === undefined) 
+
+    
+  
+    
+    let allColumns = $("#letters-raised-card").find('.new-column')
+
+      if(startLettersNewColumn){
+        if(draw !== undefined) previousEntryForletters = "d"
+        lettersMarkup = `<div class="new-column letters-column"><span class="letter ${draw === undefined ? (gameTypeLetter === firstLetter ? 'coloured' : 'dark') : 'green'}">${gameTypeLetter}</span></div>`
+      }else{
+            let lastColumn = allColumns[allColumns.length - 1]
+            
+            $(lastColumn).append(`<span class="letter ${draw === undefined ? (gameTypeLetter === firstLetter ? 'coloured' : 'dark') : 'green'}">${gameTypeLetter}</span>`)
+      }
+
+      (allColumns.length >= 44) && $(allColumns[0]).remove()
+       
+      
+  
+
+       if(gameTypeLetter !== "d") previousEntryForletters = gameTypeLetter
+       
+    
+
+  }
+
+  // helper function to generate the symbols
+ function getSymbol(flag,index,withParent = false,isKey = false){
+    
+    // if(flag){
+    //     return '🔴'
+    // }else{
+    //     return '⚪'
+    // }
+
+    
+    let color = flag % 2 === 0 ? '#193c62' : '#f07c41 ';
+    let markup = ``
+    
+    
+
+    switch(index){
+
+        case 1:
+            markup = `<span class="dot ${isKey ? 'is-key' : ''}" style="background-color:${color}"></span>`
+            break;
+       
+
+        case 2:
+          markup =  `<span class="diagonal ${isKey ? 'is-key' : ''} ${isKey && flag % 2 === 0 ? 'is-dark-color' : 'is-orange-color'}" style="border:2px solid ${color}"></span>`
+          break; 
+
+
+        case 0:
+            markup = `<span class="circle ${isKey ? 'is-key' : ''}" style="border:2px solid ${color}" ></span>`
+           
+           
+           
+            break;
+
+    }
+
+    
+   return withParent ? `<div class="new-column"> ${markup}</div>` : markup
+}
+
+
+ } // end of generateGraph
+
+ 
